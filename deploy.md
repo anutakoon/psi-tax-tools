@@ -15,8 +15,10 @@ npm install
 # 3. Build production
 npm run build
 
-# 4. Start ด้วย PM2
-pm2 start ecosystem.config.cjs --env production
+# 4. Start ด้วย PM2 (เลือกวิธีใดวิธีหนึ่ง)
+pm2 start ecosystem.config.cjs
+# หรือ
+pm2 start npm --name "psi-tax-tools" -- start
 
 # 5. Save PM2 config
 pm2 save
