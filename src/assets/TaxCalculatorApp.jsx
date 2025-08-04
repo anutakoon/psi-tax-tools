@@ -18,8 +18,29 @@ const TaxCalculatorApp = () => {
 
   const taxRates = [1, 2, 3, 5, 10];
 
+  // Helper function to clean and parse number input
+  const parseNumberInput = (input) => {
+    if (!input) return NaN;
+    // Remove commas and spaces, then parse
+    const cleaned = input.toString().replace(/,/g, '').replace(/\s/g, '');
+    return parseFloat(cleaned);
+  };
+
+  // Helper function to format number with commas while typing
+  const formatNumberInput = (value) => {
+    if (!value) return '';
+    // Remove non-numeric characters except decimal point
+    const numericValue = value.replace(/[^0-9.]/g, '');
+    // Split by decimal point
+    const parts = numericValue.split('.');
+    // Add commas to integer part
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    // Rejoin with decimal point if exists
+    return parts.length > 1 ? parts[0] + '.' + parts[1] : parts[0];
+  };
+
   const calculateInvoice = () => {
-    const amount = parseFloat(desiredAmount);
+    const amount = parseNumberInput(desiredAmount);
     
     if (isNaN(amount) || amount <= 0) {
       alert('กรุณากรอกจำนวนเงินที่ถูกต้อง');
@@ -38,7 +59,7 @@ const TaxCalculatorApp = () => {
   };
 
   const calculateVAT = () => {
-    const amount = parseFloat(vatAmount);
+    const amount = parseNumberInput(vatAmount);
     
     if (isNaN(amount) || amount <= 0) {
       alert('กรุณากรอกจำนวนเงินที่ถูกต้อง');
@@ -194,11 +215,14 @@ const TaxCalculatorApp = () => {
                     จำนวนเงินที่ต้องการรับจริง (บาท)
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     value={desiredAmount}
-                    onChange={(e) => setDesiredAmount(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && calculateInvoice()}
-                    placeholder="เช่น 1200.00"
+                    onChange={(e) => {
+                      const formatted = formatNumberInput(e.target.value);
+                      setDesiredAmount(formatted);
+                    }}
+                    onKeyDown={(e) => e.key === 'Enter' && calculateInvoice()}
+                    placeholder="เช่น 1,200.00"
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition-colors text-lg"
                   />
                 </div>
@@ -333,11 +357,14 @@ const TaxCalculatorApp = () => {
                     {vatType === 'exclude' ? 'จำนวนเงินก่อน VAT (บาท)' : 'จำนวนเงินรวม VAT แล้ว (บาท)'}
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     value={vatAmount}
-                    onChange={(e) => setVatAmount(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && calculateVAT()}
-                    placeholder="เช่น 1000.00"
+                    onChange={(e) => {
+                      const formatted = formatNumberInput(e.target.value);
+                      setVatAmount(formatted);
+                    }}
+                    onKeyDown={(e) => e.key === 'Enter' && calculateVAT()}
+                    placeholder="เช่น 1,000.00"
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-colors text-lg"
                   />
                 </div>
