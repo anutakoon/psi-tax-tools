@@ -9,6 +9,7 @@ const TaxCalculatorApp = () => {
   const [selectedTaxRate, setSelectedTaxRate] = useState(3);
   const [desiredAmount, setDesiredAmount] = useState('');
   const [result, setResult] = useState(null);
+  const [taxCalculationMode, setTaxCalculationMode] = useState('netToGross'); // 'netToGross' or 'grossToNet'
 
   // VAT Calculator States
   const [vatType, setVatType] = useState('exclude'); // 'exclude' = VAT นอก, 'include' = VAT ใน
@@ -48,13 +49,24 @@ const TaxCalculatorApp = () => {
     }
 
     const taxRateDecimal = selectedTaxRate / 100;
-    const invoiceAmount = amount / (1 - taxRateDecimal);
-    const taxAmount = invoiceAmount * taxRateDecimal;
+    let invoiceAmount, taxAmount, netAmount;
+
+    if (taxCalculationMode === 'netToGross') {
+      // โหมดเดิม: จากยอดรับจริง → ยอดบิล
+      netAmount = amount;
+      invoiceAmount = amount / (1 - taxRateDecimal);
+      taxAmount = invoiceAmount * taxRateDecimal;
+    } else {
+      // โหมดใหม่: จากยอดบิล → ยอดรับจริง
+      invoiceAmount = amount;
+      taxAmount = invoiceAmount * taxRateDecimal;
+      netAmount = invoiceAmount - taxAmount;
+    }
 
     setResult({
       invoiceAmount: invoiceAmount,
       taxAmount: taxAmount,
-      netAmount: amount
+      netAmount: netAmount
     });
   };
 
@@ -185,6 +197,38 @@ const TaxCalculatorApp = () => {
           {activeMenu === 'tax-calculator' && (
             <div className="max-w-2xl mx-auto">
               <div className="bg-white rounded-2xl shadow-xl p-6 lg:p-8">
+                {/* Calculation Mode Switch */}
+                <div className="mb-8">
+                  <label className="flex items-center text-gray-700 font-medium mb-4">
+                    <Calculator className="w-5 h-5 mr-2" />
+                    เลือกประเภทการคำนวณ
+                  </label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <button
+                      onClick={() => setTaxCalculationMode('netToGross')}
+                      className={`py-4 px-6 rounded-xl font-medium transition-all duration-200 flex flex-col items-center ${
+                        taxCalculationMode === 'netToGross'
+                          ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg transform scale-105'
+                          : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                      }`}
+                    >
+                      <span className="text-lg font-semibold">ยอดรับ → บิล</span>
+                      <span className="text-sm mt-1 opacity-80">คำนวณยอดบิลจากเงินที่ต้องการรับ</span>
+                    </button>
+                    <button
+                      onClick={() => setTaxCalculationMode('grossToNet')}
+                      className={`py-4 px-6 rounded-xl font-medium transition-all duration-200 flex flex-col items-center ${
+                        taxCalculationMode === 'grossToNet'
+                          ? 'bg-gradient-to-r from-green-600 to-teal-600 text-white shadow-lg transform scale-105'
+                          : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                      }`}
+                    >
+                      <span className="text-lg font-semibold">บิล → ยอดรับ</span>
+                      <span className="text-sm mt-1 opacity-80">คำนวณเงินรับจากยอดบิล</span>
+                    </button>
+                  </div>
+                </div>
+
                 {/* Tax Rate Selector */}
                 <div className="mb-8">
                   <label className="flex items-center text-gray-700 font-medium mb-4">
@@ -212,7 +256,9 @@ const TaxCalculatorApp = () => {
                 <div className="mb-6">
                   <label className="flex items-center text-gray-700 font-medium mb-3">
                     <DollarSign className="w-5 h-5 mr-2" />
-                    จำนวนเงินที่ต้องการรับจริง (บาท)
+                    {taxCalculationMode === 'netToGross' 
+                      ? 'จำนวนเงินที่ต้องการรับจริง (บาท)' 
+                      : 'จำนวนเงินในบิล (บาท)'}
                   </label>
                   <input
                     type="text"
@@ -222,7 +268,7 @@ const TaxCalculatorApp = () => {
                       setDesiredAmount(formatted);
                     }}
                     onKeyDown={(e) => e.key === 'Enter' && calculateInvoice()}
-                    placeholder="เช่น 1,200.00"
+                    placeholder={taxCalculationMode === 'netToGross' ? 'เช่น 4,850.00' : 'เช่น 5,000.00'}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition-colors text-lg"
                   />
                 </div>
@@ -230,10 +276,16 @@ const TaxCalculatorApp = () => {
                 {/* Calculate Button */}
                 <button
                   onClick={calculateInvoice}
-                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl font-medium text-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center"
+                  className={`w-full py-4 rounded-xl font-medium text-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center text-white ${
+                    taxCalculationMode === 'netToGross'
+                      ? 'bg-gradient-to-r from-purple-600 to-blue-600'
+                      : 'bg-gradient-to-r from-green-600 to-teal-600'
+                  }`}
                 >
                   <Calculator className="w-5 h-5 mr-2" />
-                  คำนวณจำนวนเงินที่ต้องออกบิล
+                  {taxCalculationMode === 'netToGross' 
+                    ? 'คำนวณจำนวนเงินที่ต้องออกบิล' 
+                    : 'คำนวณจำนวนเงินที่จะได้รับ'}
                 </button>
 
                 {/* Result Section */}
@@ -269,12 +321,25 @@ const TaxCalculatorApp = () => {
                 )}
 
                 {/* Example Box */}
-                <div className="mt-8 bg-blue-50 border-l-4 border-blue-400 p-4 rounded-lg">
-                  <h3 className="font-semibold text-blue-800 mb-2">💡 ตัวอย่างการคำนวณ</h3>
-                  <p className="text-blue-700 text-sm leading-relaxed">
-                    หากต้องการรับเงิน 1,200 บาท และมีการหักภาษี ณ ที่จ่าย 3%
-                    ระบบจะคำนวณว่าต้องออกบิล 1,237.11 บาท
-                    (หักภาษี 37.11 บาท คงเหลือรับสุทธิ 1,200 บาท)
+                <div className={`mt-8 p-4 rounded-lg border-l-4 ${
+                  taxCalculationMode === 'netToGross' 
+                    ? 'bg-blue-50 border-blue-400' 
+                    : 'bg-green-50 border-green-400'
+                }`}>
+                  <h3 className={`font-semibold mb-2 ${
+                    taxCalculationMode === 'netToGross' 
+                      ? 'text-blue-800' 
+                      : 'text-green-800'
+                  }`}>💡 ตัวอย่างการคำนวณ</h3>
+                  <p className={`text-sm leading-relaxed ${
+                    taxCalculationMode === 'netToGross' 
+                      ? 'text-blue-700' 
+                      : 'text-green-700'
+                  }`}>
+                    {taxCalculationMode === 'netToGross' 
+                      ? 'หากต้องการรับเงิน 4,850 บาท และมีการหักภาษี ณ ที่จ่าย 3% ระบบจะคำนวณว่าต้องออกบิล 5,000 บาท (หักภาษี 150 บาท คงเหลือรับสุทธิ 4,850 บาท)'
+                      : 'หากออกบิล 5,000 บาท และมีการหักภาษี ณ ที่จ่าย 3% ระบบจะคำนวณว่าจะได้รับเงิน 4,850 บาท (หักภาษี 150 บาท จากยอดบิล 5,000 บาท)'
+                    }
                   </p>
                 </div>
               </div>
