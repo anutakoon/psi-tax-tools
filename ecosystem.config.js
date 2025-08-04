@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   apps: [
     {
       name: 'psi-tax-tools',
@@ -32,4 +32,4 @@ module.exports = {
       'pre-setup': ''
     }
   }
-};
+}

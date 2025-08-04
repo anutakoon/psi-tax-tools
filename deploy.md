@@ -16,7 +16,7 @@ npm install
 npm run build
 
 # 4. Start ด้วย PM2
-pm2 start ecosystem.config.js --env production
+pm2 start ecosystem.config.cjs --env production
 
 # 5. Save PM2 config
 pm2 save
@@ -27,18 +27,18 @@ pm2 startup
 
 ```bash
 # 1. Setup บน server ครั้งแรก
-pm2 deploy ecosystem.config.js production setup
+pm2 deploy ecosystem.config.cjs production setup
 
 # 2. Deploy
-pm2 deploy ecosystem.config.js production
+pm2 deploy ecosystem.config.cjs production
 
 # 3. ครั้งต่อไป (update code)
-pm2 deploy ecosystem.config.js production update
+pm2 deploy ecosystem.config.cjs production update
 ```
 
 ## ⚙️ การตั้งค่า
 
-### 1. แก้ไข `ecosystem.config.js`
+### 1. แก้ไข `ecosystem.config.cjs`
 - `cwd`: path ของโปรเจกต์บน server
 - `user`: username บน server  
 - `host`: IP หรือ domain ของ server
@@ -46,7 +46,7 @@ pm2 deploy ecosystem.config.js production update
 
 ### 2. Port Configuration
 - App จะรันที่ port 3000
-- ถ้าต้องการเปลี่ยน port แก้ในไฟล์ `ecosystem.config.js`
+- ถ้าต้องการเปลี่ยน port แก้ในไฟล์ `ecosystem.config.cjs`
 
 ### 3. Nginx Configuration (ถ้าใช้)
 ```nginx
@@ -101,5 +101,5 @@ npm run build
 pm2 restart psi-tax-tools
 
 # วิธี 2: Auto deploy
-pm2 deploy ecosystem.config.js production update
+pm2 deploy ecosystem.config.cjs production update
 ```
